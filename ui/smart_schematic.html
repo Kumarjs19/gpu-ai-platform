@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+canvas{border:1px solid #ccc;width:100%;height:420px}
+</style>
+</head>
+<body>
+<h3>🧠 Smart Layout (Multi-branch)</h3>
+<textarea id="net" style="width:100%;height:120px">V1 1 0 DC 10
+R1 1 2 1k
+R2 2 0 1k
+R3 1 3 2k
+R4 3 0 2k
+.op
+.end</textarea>
+<button onclick="draw()" style="width:100%;padding:10px">Draw</button>
+<canvas id="c"></canvas>
+<script>
+const c=document.getElementById('c');const ctx=c.getContext('2d');c.width=c.clientWidth;c.height=420;
+function parse(n){return n.split('\n').map(l=>l.trim().split(' ')).filter(p=>p[0]&&(/[RVCLDQ]/.test(p[0][0]))).map(p=>({t:p[0][0],a:p[1],b:p[2]}));}
+function layout(comps){const nodes={};let idx=0;Object.values(comps).forEach(c=>{if(!nodes[c.a])nodes[c.a]={i:idx++};if(!nodes[c.b])nodes[c.b]={i:idx++};});
+// grid positions
+const cols=4;Object.keys(nodes).forEach((k,i)=>{nodes[k].x=80+(i%cols)*180;nodes[k].y=80+Math.floor(i/cols)*120});return nodes;}
+function compDraw(t,x,y){if(t==='R'){ctx.strokeRect(x-12,y-6,24,12)}
+else if(t==='V'){ctx.beginPath();ctx.arc(x,y,10,0,2*Math.PI);ctx.stroke()}
+else{ctx.fillRect(x-6,y-6,12,12)}}
+function draw(){ctx.clearRect(0,0,c.width,c.height);const comps=parse(document.getElementById('net').value);const nodes=layout(comps);
+// wires
+comps.forEach(o=>{const p1=nodes[o.a],p2=nodes[o.b];ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();
+// component at midpoint
+const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2;compDraw(o.t,mx,my)});
+// nodes
+Object.entries(nodes).forEach(([k,p])=>{ctx.beginPath();ctx.arc(p.x,p.y,4,0,2*Math.PI);ctx.fill();ctx.fillText(k,p.x+6,p.y-6)});
+}
+</script>
+</body>
+</html>
