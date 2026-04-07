@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h3>📦 Admin Panel (Orders)</h3>
+<button onclick="load()">Refresh Orders</button>
+<pre id="out"></pre>
+<script>
+async function load(){
+ const res = await fetch('http://localhost:8000/order',{
+  method:'POST',headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({netlist:"V1 1 0 DC 5\nR1 1 0 1k"})
+ });
+ const data = await res.json();
+ document.getElementById('out').innerText = JSON.stringify(data,null,2);
+}
+</script>
+</body>
+</html>
