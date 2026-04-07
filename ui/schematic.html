@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+#canvas { border:1px solid #ccc; width:100%; height:400px; }
+.toolbox button{margin:4px;}
+</style>
+</head>
+<body>
+<h3>🧩 Schematic Editor (KiCad-style v1)</h3>
+<div class="toolbox">
+  <button onclick="add('R')">Resistor</button>
+  <button onclick="add('V')">Source</button>
+  <button onclick="add('W')">Wire</button>
+</div>
+<canvas id="canvas"></canvas>
+<script>
+const c = document.getElementById('canvas');
+const ctx = c.getContext('2d');
+c.width = c.clientWidth; c.height = 400;
+let comps=[];
+function add(t){ comps.push({t,x:50+comps.length*60,y:200}); draw(); }
+function draw(){ ctx.clearRect(0,0,c.width,c.height);
+  comps.forEach(o=>{
+    if(o.t==='R'){ ctx.strokeRect(o.x,o.y,40,10); }
+    if(o.t==='V'){ ctx.beginPath(); ctx.arc(o.x,o.y,10,0,2*Math.PI); ctx.stroke(); }
+  });
+}
+</script>
+</body>
+</html>
