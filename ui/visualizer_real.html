@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+canvas { border:1px solid #ccc; width:100%; }
+#warnings { color:red; font-weight:bold; }
+</style>
+</head>
+<body>
+
+<h3>⚡ Circuit Visualizer (Real)</h3>
+<textarea id="netlist" style="width:100%;height:120px;">V1 1 0 DC 5
+R1 1 0 1k
+.op
+.end</textarea>
+<button onclick="run()" style="width:100%;padding:10px;">Simulate</button>
+
+<div id="warnings"></div>
+<canvas id="c" height="300"></canvas>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+function getColor(v){
+  if(v>4) return 'red';
+  if(v>2) return 'orange';
+  return 'blue';
+}
+
+function draw(nodes){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  for(let i=0;i<nodes.length-1;i++){
+    const n1 = nodes[i];
+    const n2 = nodes[i+1];
+
+    const grad = ctx.createLinearGradient(n1.x,n1.y,n2.x,n2.y);
+    grad.addColorStop(0,getColor(n1.v));
+    grad.addColorStop(1,getColor(n2.v));
+
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(n1.x,n1.y);
+    ctx.lineTo(n2.x,n2.y);
+    ctx.stroke();
+  }
+
+  nodes.forEach(n=>{
+    ctx.fillStyle = getColor(n.v);
+    ctx.beginPath();
+    ctx.arc(n.x,n.y,10,0,2*Math.PI);
+    ctx.fill();
+  });
+}
+
+async function run(){
+ const res = await fetch('http://localhost:8000/simulate-visual',{
+  method:'POST',headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({netlist: document.getElementById('netlist').value})
+ });
+
+ const data = await res.json();
+
+ // show warnings
+ const warnDiv = document.getElementById('warnings');
+ warnDiv.innerHTML = data.issues.map(i=>"⚠️ "+i).join("<br>");
+
+ // convert voltages to nodes (simple layout)
+ const voltages = Object.values(data.simulation.voltages);
+ const nodes = voltages.map((v,i)=>({
+   x:50 + i*150,
+   y:150,
+   v:v
+ }));
+
+ draw(nodes);
+}
+</script>
+
+</body>
+</html>
