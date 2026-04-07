@@ -1,0 +1,31 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: app
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+
+  api:
+    build: ./api
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/app
+      - REDIS_HOST=redis
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    build: ./worker
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
