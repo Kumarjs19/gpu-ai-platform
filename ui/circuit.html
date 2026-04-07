@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Circuit Simulator</h2>
+<textarea id="netlist" rows="10" cols="50">* Simple resistor
+V1 1 0 DC 5
+R1 1 0 1k
+.op
+.end</textarea><br>
+<button onclick="simulate()">Run</button>
+<pre id="out"></pre>
+<script>
+async function simulate(){
+ const res = await fetch('http://localhost:8000/simulate',{
+  method:'POST',headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({netlist: document.getElementById('netlist').value})
+ });
+ const data = await res.json();
+ document.getElementById('out').innerText = data.stdout;
+}
+</script>
+</body>
+</html>
