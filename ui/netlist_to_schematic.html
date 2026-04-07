@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+canvas { border:1px solid #ccc; width:100%; height:400px; }
+</style>
+</head>
+<body>
+
+<h3>🔄 Netlist → Schematic Auto Draw</h3>
+<textarea id="netlist" style="width:100%;height:120px;">V1 1 0 DC 10
+R1 1 2 1k
+R2 2 0 1k
+.op
+.end</textarea>
+<button onclick="drawCircuit()" style="width:100%;padding:10px;">Draw</button>
+
+<canvas id="c"></canvas>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+canvas.width = canvas.clientWidth;
+canvas.height = 400;
+
+function parse(netlist){
+  const lines = netlist.split('\n');
+  const comps = [];
+
+  lines.forEach(l=>{
+    const p = l.trim().split(' ');
+    if(p[0]?.startsWith('R') || p[0]?.startsWith('V')){
+      comps.push({
+        type: p[0][0],
+        n1: p[1],
+        n2: p[2]
+      });
+    }
+  });
+
+  return comps;
+}
+
+function drawCircuit(){
+  const netlist = document.getElementById('netlist').value;
+  const comps = parse(netlist);
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const nodePos = {};
+  let x = 50;
+
+  comps.forEach((c,i)=>{
+    if(!nodePos[c.n1]) nodePos[c.n1] = {x:x,y:200};
+    if(!nodePos[c.n2]) nodePos[c.n2] = {x:x+100,y:200};
+
+    const p1 = nodePos[c.n1];
+    const p2 = nodePos[c.n2];
+
+    // draw wire
+    ctx.beginPath();
+    ctx.moveTo(p1.x,p1.y);
+    ctx.lineTo(p2.x,p2.y);
+    ctx.stroke();
+
+    // draw component
+    if(c.type==='R'){
+      ctx.strokeRect((p1.x+p2.x)/2-10, p1.y-5, 20, 10);
+    }
+    if(c.type==='V'){
+      ctx.beginPath();
+      ctx.arc((p1.x+p2.x)/2, p1.y, 10, 0, 2*Math.PI);
+      ctx.stroke();
+    }
+
+    x += 120;
+  });
+}
+</script>
+
+</body>
+</html>
