@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<body>
+<h3>📱 Circuit AI (Mobile)</h3>
+<textarea id="netlist" style="width:100%;height:120px;">V1 1 0 DC 5
+R1 1 0 1k
+.op
+.end</textarea>
+<button onclick="run()" style="width:100%;padding:10px;">Simulate</button>
+<pre id="out"></pre>
+<script>
+async function run(){
+ const res = await fetch('http://localhost:8000/simulate-visual',{
+  method:'POST',headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({netlist: document.getElementById('netlist').value})
+ });
+ const data = await res.json();
+ document.getElementById('out').innerText = JSON.stringify(data,null,2);
+}
+</script>
+</body>
+</html>
