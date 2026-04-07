@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h3>🧾 BOM + Cost Estimator</h3>
+<textarea id="net" style="width:100%;height:120px">V1 1 0 DC 10
+R1 1 2 1k
+R2 2 0 1k
+</textarea>
+<button onclick="run()">Generate BOM</button>
+<pre id="out"></pre>
+<button onclick="order()">🛒 Build Prototype</button>
+<script>
+let lastData;
+async function run(){
+ const res = await fetch('http://localhost:8000/bom',{
+  method:'POST',headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({netlist: document.getElementById('net').value})
+ });
+ lastData = await res.json();
+ document.getElementById('out').innerText = JSON.stringify(lastData,null,2);
+}
+function order(){
+ alert('Order placed! (next step: payment + vendor integration)');
+}
+</script>
+</body>
+</html>
