@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+canvas { border:1px solid #ccc; }
+</style>
+</head>
+<body>
+
+<h2>Circuit Visualization</h2>
+<canvas id="c" width="600" height="300"></canvas>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+// Sample nodes (mock data from simulation)
+const nodes = [
+  {x:50,y:150,v:5},
+  {x:250,y:150,v:2.5},
+  {x:450,y:150,v:0}
+];
+
+function draw(){
+  ctx.clearRect(0,0,600,300);
+
+  for(let i=0;i<nodes.length-1;i++){
+    const n1 = nodes[i];
+    const n2 = nodes[i+1];
+
+    const gradient = ctx.createLinearGradient(n1.x,n1.y,n2.x,n2.y);
+    gradient.addColorStop(0,getColor(n1.v));
+    gradient.addColorStop(1,getColor(n2.v));
+
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(n1.x,n1.y);
+    ctx.lineTo(n2.x,n2.y);
+    ctx.stroke();
+  }
+
+  nodes.forEach(n=>{
+    ctx.fillStyle = getColor(n.v);
+    ctx.beginPath();
+    ctx.arc(n.x,n.y,10,0,2*Math.PI);
+    ctx.fill();
+  });
+}
+
+function getColor(v){
+  if(v>4) return 'red';
+  if(v>2) return 'orange';
+  return 'blue';
+}
+
+// animate current flow
+let offset = 0;
+function animate(){
+  draw();
+
+  ctx.fillStyle = 'white';
+  nodes.forEach((n,i)=>{
+    if(i<nodes.length-1){
+      const n2 = nodes[i+1];
+      const x = n.x + (n2.x-n.x)*(offset%1);
+      const y = n.y + (n2.y-n.y)*(offset%1);
+      ctx.beginPath();
+      ctx.arc(x,y,5,0,2*Math.PI);
+      ctx.fill();
+    }
+  });
+
+  offset += 0.02;
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+
+</body>
+</html>
